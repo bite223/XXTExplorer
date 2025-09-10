@@ -15,11 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ 编译 .app（Skip signing）
+      # 2️⃣ 编译 .app（Skip signing，跳过 Pod）
       - name: Build .app (Skip signing)
         run: |
-          cd XXTExplorer
           xcodebuild \
+            -project XXTExplorer/XXTExplorer.xcodeproj \
             -scheme XXTouch \
             -configuration Release \
             -sdk iphoneos \
@@ -38,7 +38,7 @@ jobs:
           zip -r XXTExplorer.ipa Payload
           mv XXTExplorer.ipa $GITHUB_WORKSPACE/
 
-      # 4️⃣ 上传 Artifact（v4 版本）
+      # 4️⃣ 上传 Artifact
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
