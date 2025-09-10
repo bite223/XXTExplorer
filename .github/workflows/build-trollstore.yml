@@ -1,0 +1,40 @@
+name: Build IPA for TrollStore
+
+on:
+  workflow_dispatch:  # 手动触发
+  push:
+    branches:
+      - main  # 可选，push 到 main 时自动触发
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build .app (Skip signing)
+        run: |
+          xcodebuild \
+            -scheme XXTExplorer \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            -derivedDataPath build
+
+      - name: Package .ipa
+        run: |
+          cd build/Build/Products/Release-iphoneos
+          mkdir Payload
+          mv XXTExplorer.app Payload/
+          zip -r XXTExplorer.ipa Payload
+          mv XXTExplorer.ipa $GITHUB_WORKSPACE/
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: XXTExplorer-TrollStore
+          path: XXTExplorer.ipa
