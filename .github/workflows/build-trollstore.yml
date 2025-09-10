@@ -1,26 +1,23 @@
 name: Build IPA for TrollStore
 
 on:
-  workflow_dispatch:       # 手动触发
+  workflow_dispatch:
   push:
     branches:
-      - main              # push main 自动触发
+      - main
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      # 1️⃣ 拉取代码
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2️⃣ 编译 .app（Skip signing，跳过 Pod）
-      - name: Build .app (Skip signing)
+      - name: Build .app (Skip signing, no Pod)
         run: |
-          # 使用 xcodeproj（跳过 Pod）
           xcodebuild \
-            -project XXTExplorer/XXTExplorer.xcodeproj \
+            -project XXTExplorer.xcodeproj \
             -scheme XXTouch \
             -configuration Release \
             -sdk iphoneos \
@@ -30,16 +27,14 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             -derivedDataPath build
 
-      # 3️⃣ 打包成 IPA
       - name: Package .ipa
         run: |
-          cd XXTExplorer/build/Build/Products/Release-iphoneos
+          cd build/Build/Products/Release-iphoneos
           mkdir Payload
           mv XXTExplorer.app Payload/
           zip -r XXTExplorer.ipa Payload
           mv XXTExplorer.ipa $GITHUB_WORKSPACE/
 
-      # 4️⃣ 上传 Artifact
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
